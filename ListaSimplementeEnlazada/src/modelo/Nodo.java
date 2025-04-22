@@ -1,40 +1,34 @@
 package modelo;
 
-;
+import interfaces.INodo;
 
-public class Nodo  {
-    //private int dato;
-	private Vehiculo dato;
-    private Nodo siguiente; //INodo
-    //private Nodo anterior; SIIIII
+public class Nodo implements INodo {
+
+    private Vehiculo dato;
+    private INodo siguiente;
 
     public Nodo(Vehiculo dato) {
         this.dato = dato;
         this.siguiente = null;
     }
 
-    
+    @Override
     public Vehiculo getDato() {
         return dato;
     }
 
-  
+    @Override
     public void setDato(Vehiculo dato) {
         this.dato = dato;
     }
 
-    
-    public Nodo getSiguiente() {
+    @Override
+    public INodo getSiguiente() {
         return siguiente;
     }
 
-   
-    public void setSiguiente(Nodo nodo) {
-        this.siguiente = nodo;
+    @Override
+    public void setSiguiente(INodo siguiente) {
+        this.siguiente = siguiente;
     }
 }
-
-
-
-
-//iriarte
