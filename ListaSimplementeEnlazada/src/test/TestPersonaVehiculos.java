@@ -3,40 +3,39 @@ package test;
 import modelo.Persona;
 import modelo.Vehiculo;
 
-///Listas simplemente enlazadas N - > sig,  ant
-///Listas doblemete enlazadas (int)
-///Persona que tiene una lista de Vehiculos!!!!
-
 public class TestPersonaVehiculos {
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		Persona p = new Persona(11111, "Nico Perez");//Se crea la lista nula!!
-		Vehiculo v = new Vehiculo("11AA222", "Fiat Uno");
-		
-		//Dos formas de insertar en la lista
-		//La primera por parametos, la segunda por referencia
-		p.getListaVehiculos().insertarPrimero(new Vehiculo("xxx111", "Toyota"));
-		p.getListaVehiculos().insertarPrimero(v);
-		
-		//Muestro la persona, y sus vehiculos concatenados
-		//Atentos a cómo manejo el toString de ambos y los
-		//procedimientos de mostrar. 
-		p.mostrarPersona();
-		///Notar que toda la información quedó guardada en la persona
-		///
-		///NOTAS: 
-		///esto es una ayuda para el tp1, pero tienen muchas cosas que mejorar
-		///1 - Hacer y usar una lista doblemente enlazada
-		///2 - Testear más metodos, incluso algunos sofisticados como 
-		///ordenar y buscar vehiculos
-		///3 - El nodo tiene que tener el anterior, ojo que eso modifica los métodos
-		///4 - Yo omiti las interfaces para hacer más rapido el ejemplo
-		///Ustedes tienen que poner las interfaces y usarlas bien
-		///Ningún items es obligatorio, pero cuanto más completo más nota. 
-		
+    public static void main(String[] args) {
 
-	}
+        Persona p = new Persona(11111, "Bruno Bianchi");
 
+        test("Lista no debe ser vacia", p.getListaVehiculos().esVacia(), true);
+
+        Vehiculo v1 = new Vehiculo("aaa111", "Toyota gr yaris");
+        p.getListaVehiculos().insertarPrimero(v1);
+        test("Lista no debe ser vacia tras insertarPrimero", p.getListaVehiculos().esVacia(), false);
+        test("cantidadElementos debe ser 1 tras insertarPrimero", p.getListaVehiculos().cantidadElementos(), 1);
+        test("obtenerPrimero debe ser v1", p.getListaVehiculos().obtenerPrimero(), v1);
+
+        Vehiculo v2 = new Vehiculo("bbb222", "Fiat Uno");
+        p.getListaVehiculos().insertarUltimo(v2);
+        test("cantidadElementos debe ser 2 tras insertarUltimo", p.getListaVehiculos().cantidadElementos(), 2);
+        test("obtenerPrimero permanece v1 tras insertarUltimo", p.getListaVehiculos().obtenerPrimero(), v1);
+
+        p.mostrarPersona();
+
+    }
+
+    private static void test(String descripcion, boolean actual, boolean esperado) {
+        System.out.println(descripcion);
+
+    }
+
+    private static void test(String descripcion, int actual, int esperado) {
+        System.out.println(descripcion);
+    }
+
+    private static void test(String descripcion, Vehiculo actual, Vehiculo esperado) {
+        System.out.println(descripcion);
+    }
 }
