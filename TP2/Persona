@@ -1,0 +1,219 @@
+import java.util.*;
+
+// Clase Persona
+class Persona implements Comparable<Persona> {
+    private String nombre;
+    private int dni;
+    
+    // Constructor
+    public Persona(String nombre, int dni) {
+        this.nombre = nombre;
+        this.dni = dni;
+    }
+    
+    // Getters
+    public String getNombre() {
+        return nombre;
+    }
+    
+    public int getDni() {
+        return dni;
+    }
+    
+    // Setters
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    
+    public void setDni(int dni) {
+        this.dni = dni;
+    }
+    
+    // Comparación por DNI (para el árbol principal)
+    @Override
+    public int compareTo(Persona otra) {
+        return Integer.compare(this.dni, otra.dni);
+    }
+    
+    // Comparador por nombre (para árbol alternativo)
+    public static Comparator<Persona> compararPorNombre() {
+        return (p1, p2) -> p1.nombre.compareToIgnoreCase(p2.nombre);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("Persona{nombre='%s', dni=%d}", nombre, dni);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Persona persona = (Persona) obj;
+        return dni == persona.dni;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(dni);
+    }
+}
+
+// Nodo del árbol binario
+class NodoArbol {
+    Persona persona;
+    NodoArbol izquierdo;
+    NodoArbol derecho;
+    
+    public NodoArbol(Persona persona) {
+        this.persona = persona;
+        this.izquierdo = null;
+        this.derecho = null;
+    }
+}
+
+// Clase ArbolBinario
+class ArbolBinario {
+    private NodoArbol raiz;
+    private Comparator<Persona> comparador;
+    
+    // Constructor por defecto (compara por DNI)
+    public ArbolBinario() {
+        this.raiz = null;
+        this.comparador = null; // null significa usar compareTo (DNI)
+    }
+    
+    // Constructor con comparador personalizado
+    public ArbolBinario(Comparator<Persona> comparador) {
+        this.raiz = null;
+        this.comparador = comparador;
+    }
+    
+    // Método público para insertar
+    public void insertar(Persona persona) {
+        raiz = insertarRecursivo(raiz, persona);
+    }
+    
+    // Método recursivo para insertar
+    private NodoArbol insertarRecursivo(NodoArbol nodo, Persona persona) {
+        // Si el nodo es null, crear nuevo nodo
+        if (nodo == null) {
+            return new NodoArbol(persona);
+        }
+        
+        // Comparar usando el comparador apropiado
+        int comparacion;
+        if (comparador != null) {
+            comparacion = comparador.compare(persona, nodo.persona);
+        } else {
+            comparacion = persona.compareTo(nodo.persona);
+        }
+        
+        // Insertar en el subárbol correspondiente
+        if (comparacion < 0) {
+            nodo.izquierdo = insertarRecursivo(nodo.izquierdo, persona);
+        } else if (comparacion > 0) {
+            nodo.derecho = insertarRecursivo(nodo.derecho, persona);
+        }
+        // Si comparacion == 0, no insertar (evitar duplicados)
+        
+        return nodo;
+    }
+    
+    // Recorrido In-Order (Izquierdo - Raíz - Derecho)
+    public void recorridoInOrder() {
+        System.out.println("Recorrido In-Order:");
+        recorridoInOrderRecursivo(raiz);
+        System.out.println();
+    }
+    
+    private void recorridoInOrderRecursivo(NodoArbol nodo) {
+        if (nodo != null) {
+            recorridoInOrderRecursivo(nodo.izquierdo);
+            System.out.println("  " + nodo.persona);
+            recorridoInOrderRecursivo(nodo.derecho);
+        }
+    }
+    
+    // Recorrido Pre-Order (Raíz - Izquierdo - Derecho)
+    public void recorridoPreOrder() {
+        System.out.println("Recorrido Pre-Order:");
+        recorridoPreOrderRecursivo(raiz);
+        System.out.println();
+    }
+    
+    private void recorridoPreOrderRecursivo(NodoArbol nodo) {
+        if (nodo != null) {
+            System.out.println("  " + nodo.persona);
+            recorridoPreOrderRecursivo(nodo.izquierdo);
+            recorridoPreOrderRecursivo(nodo.derecho);
+        }
+    }
+    
+    // Recorrido Post-Order (Izquierdo - Derecho - Raíz)
+    public void recorridoPostOrder() {
+        System.out.println("Recorrido Post-Order:");
+        recorridoPostOrderRecursivo(raiz);
+        System.out.println();
+    }
+    
+    private void recorridoPostOrderRecursivo(NodoArbol nodo) {
+        if (nodo != null) {
+            recorridoPostOrderRecursivo(nodo.izquierdo);
+            recorridoPostOrderRecursivo(nodo.derecho);
+            System.out.println("  " + nodo.persona);
+        }
+    }
+    
+    // Método para mostrar todos los recorridos
+    public void mostrarRecorridos() {
+        recorridoInOrder();
+        recorridoPreOrder();
+        recorridoPostOrder();
+    }
+}
+
+// Clase principal para probar
+public class Main {
+    public static void main(String[] args) {
+        // Crear árbol ordenado por DNI
+        ArbolBinario arbolPorDni = new ArbolBinario();
+        
+        // Crear árbol ordenado por nombre
+        ArbolBinario arbolPorNombre = new ArbolBinario(Persona.compararPorNombre());
+        
+        // Crear 15 personas con datos variados
+        Persona[] personas = {
+            new Persona("Ana García", 12345678),
+            new Persona("Carlos López", 23456789),
+            new Persona("María Rodríguez", 34567890),
+            new Persona("Juan Pérez", 45678901),
+            new Persona("Laura Martínez", 56789012),
+            new Persona("Diego Fernández", 67890123),
+            new Persona("Sofia González", 78901234),
+            new Persona("Miguel Torres", 89012345),
+            new Persona("Elena Ruiz", 90123456),
+            new Persona("Pablo Jiménez", 11234567),
+            new Persona("Carmen Morales", 22345678),
+            new Persona("Roberto Silva", 33456789),
+            new Persona("Isabel Herrera", 44567890),
+            new Persona("Fernando Castro", 55678901),
+            new Persona("Lucía Romero", 66789012)
+        };
+        
+        // Insertar todas las personas en ambos árboles
+        System.out.println("Insertando 15 personas en los árboles...\n");
+        for (Persona p : personas) {
+            arbolPorDni.insertar(p);
+            arbolPorNombre.insertar(p);
+        }
+        
+        // Mostrar árbol ordenado por DNI
+        System.out.println("=== ÁRBOL ORDENADO POR DNI ===");
+        arbolPorDni.mostrarRecorridos();
+        
+        // Mostrar árbol ordenado por nombre
+        System.out.println("=== ÁRBOL ORDENADO POR NOMBRE ===");
+        arbolPorNombre.mostrarRecorridos();
+    }
+}
