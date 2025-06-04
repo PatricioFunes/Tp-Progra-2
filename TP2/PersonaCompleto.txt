@@ -1,0 +1,247 @@
+import java.util.*;
+
+// Clase Persona
+class Persona implements Comparable<Persona> {
+    private String nombre;
+    private int dni;
+
+    public Persona(String nombre, int dni) {
+        this.nombre = nombre;
+        this.dni = dni;
+    }
+
+    public String getNombre() { return nombre; }
+    public int getDni() { return dni; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setDni(int dni) { this.dni = dni; }
+
+    @Override
+    public int compareTo(Persona otra) {
+        return Integer.compare(this.dni, otra.dni);
+    }
+
+    public static Comparator<Persona> compararPorNombre() {
+        return (p1, p2) -> p1.nombre.compareToIgnoreCase(p2.nombre);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Persona{nombre='%s', dni=%d}", nombre, dni);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Persona persona = (Persona) obj;
+        return dni == persona.dni;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dni);
+    }
+}
+
+// Nodo del árbol binario
+class NodoArbol {
+    Persona persona;
+    NodoArbol izquierdo, derecho;
+
+    public NodoArbol(Persona persona) {
+        this.persona = persona;
+        this.izquierdo = null;
+        this.derecho = null;
+    }
+}
+
+// Clase ArbolBinario
+class ArbolBinario {
+    private NodoArbol raiz;
+    private Comparator<Persona> comparador;
+
+    public ArbolBinario() {
+        this.raiz = null;
+        this.comparador = null;
+    }
+
+    public ArbolBinario(Comparator<Persona> comparador) {
+        this.raiz = null;
+        this.comparador = comparador;
+    }
+
+    public void insertar(Persona persona) {
+        raiz = insertarRecursivo(raiz, persona);
+    }
+
+    private NodoArbol insertarRecursivo(NodoArbol nodo, Persona persona) {
+        if (nodo == null) return new NodoArbol(persona);
+
+        int comparacion = (comparador != null)
+            ? comparador.compare(persona, nodo.persona)
+            : persona.compareTo(nodo.persona);
+
+        if (comparacion < 0) {
+            nodo.izquierdo = insertarRecursivo(nodo.izquierdo, persona);
+        } else if (comparacion > 0) {
+            nodo.derecho = insertarRecursivo(nodo.derecho, persona);
+        }
+
+        return nodo;
+    }
+
+    public boolean buscar(Persona persona) {
+        return buscarRecursivo(raiz, persona);
+    }
+
+    private boolean buscarRecursivo(NodoArbol nodo, Persona persona) {
+        if (nodo == null) return false;
+
+        int cmp = comparador != null
+            ? comparador.compare(persona, nodo.persona)
+            : persona.compareTo(nodo.persona);
+
+        if (cmp == 0) return true;
+        if (cmp < 0) return buscarRecursivo(nodo.izquierdo, persona);
+        else return buscarRecursivo(nodo.derecho, persona);
+    }
+
+    public void eliminar(Persona persona) {
+        raiz = eliminarRecursivo(raiz, persona);
+    }
+
+    private NodoArbol eliminarRecursivo(NodoArbol nodo, Persona persona) {
+        if (nodo == null) return null;
+
+        int cmp = comparador != null
+            ? comparador.compare(persona, nodo.persona)
+            : persona.compareTo(nodo.persona);
+
+        if (cmp < 0) {
+            nodo.izquierdo = eliminarRecursivo(nodo.izquierdo, persona);
+        } else if (cmp > 0) {
+            nodo.derecho = eliminarRecursivo(nodo.derecho, persona);
+        } else {
+            if (nodo.izquierdo == null) return nodo.derecho;
+            if (nodo.derecho == null) return nodo.izquierdo;
+            NodoArbol sucesor = encontrarMinimo(nodo.derecho);
+            nodo.persona = sucesor.persona;
+            nodo.derecho = eliminarRecursivo(nodo.derecho, sucesor.persona);
+        }
+
+        return nodo;
+    }
+
+    private NodoArbol encontrarMinimo(NodoArbol nodo) {
+        while (nodo.izquierdo != null) nodo = nodo.izquierdo;
+        return nodo;
+    }
+
+    public void recorridoInOrder() {
+        System.out.println("Recorrido In-Order:");
+        recorridoInOrderRecursivo(raiz);
+        System.out.println();
+    }
+
+    private void recorridoInOrderRecursivo(NodoArbol nodo) {
+        if (nodo != null) {
+            recorridoInOrderRecursivo(nodo.izquierdo);
+            System.out.println("  " + nodo.persona);
+            recorridoInOrderRecursivo(nodo.derecho);
+        }
+    }
+
+    public void recorridoPreOrder() {
+        System.out.println("Recorrido Pre-Order:");
+        recorridoPreOrderRecursivo(raiz);
+        System.out.println();
+    }
+
+    private void recorridoPreOrderRecursivo(NodoArbol nodo) {
+        if (nodo != null) {
+            System.out.println("  " + nodo.persona);
+            recorridoPreOrderRecursivo(nodo.izquierdo);
+            recorridoPreOrderRecursivo(nodo.derecho);
+        }
+    }
+
+    public void recorridoPostOrder() {
+        System.out.println("Recorrido Post-Order:");
+        recorridoPostOrderRecursivo(raiz);
+        System.out.println();
+    }
+
+    private void recorridoPostOrderRecursivo(NodoArbol nodo) {
+        if (nodo != null) {
+            recorridoPostOrderRecursivo(nodo.izquierdo);
+            recorridoPostOrderRecursivo(nodo.derecho);
+            System.out.println("  " + nodo.persona);
+        }
+    }
+
+    public void mostrarRecorridos() {
+        recorridoInOrder();
+        recorridoPreOrder();
+        recorridoPostOrder();
+    }
+}
+
+// Clase principal
+public class Main {
+    public static void main(String[] args) {
+        ArbolBinario arbolPorDni = new ArbolBinario();
+        ArbolBinario arbolPorNombre = new ArbolBinario(Persona.compararPorNombre());
+
+        Persona[] personas = {
+            new Persona("Ana García", 12345678),
+            new Persona("Carlos López", 23456789),
+            new Persona("María Rodríguez", 34567890),
+            new Persona("Juan Pérez", 45678901),
+            new Persona("Laura Martínez", 56789012),
+            new Persona("Diego Fernández", 67890123),
+            new Persona("Sofia González", 78901234),
+            new Persona("Miguel Torres", 89012345),
+            new Persona("Elena Ruiz", 90123456),
+            new Persona("Pablo Jiménez", 11234567),
+            new Persona("Carmen Morales", 22345678),
+            new Persona("Roberto Silva", 33456789),
+            new Persona("Isabel Herrera", 44567890),
+            new Persona("Fernando Castro", 55678901),
+            new Persona("Lucía Romero", 66789012)
+        };
+
+        System.out.println("Insertando 15 personas en los árboles...\n");
+        for (Persona p : personas) {
+            arbolPorDni.insertar(p);
+            arbolPorNombre.insertar(p);
+        }
+
+        System.out.println("=== ÁRBOL ORDENADO POR DNI ===");
+        arbolPorDni.mostrarRecorridos();
+
+        System.out.println("=== ÁRBOL ORDENADO POR NOMBRE ===");
+        arbolPorNombre.mostrarRecorridos();
+
+        // Buscar algunas personas
+        System.out.println("Buscando personas (por DNI):");
+        Persona buscar1 = new Persona("", 34567890); // Solo importa el DNI
+        Persona buscar2 = new Persona("", 99999999); // No existente
+
+        System.out.println("¿Está 34567890? " + arbolPorDni.buscar(buscar1));
+        System.out.println("¿Está 99999999? " + arbolPorDni.buscar(buscar2));
+
+        // Eliminar algunas personas
+        System.out.println("\nEliminando personas (por DNI y por nombre):");
+        Persona eliminar1 = new Persona("", 34567890);
+        Persona eliminar2 = new Persona("Juan Pérez", 0); // Solo importa el nombre
+
+        arbolPorDni.eliminar(eliminar1);
+        arbolPorNombre.eliminar(eliminar2);
+
+        System.out.println("=== ÁRBOL POR DNI DESPUÉS DE ELIMINACIÓN ===");
+        arbolPorDni.mostrarRecorridos();
+
+        System.out.println("=== ÁRBOL POR NOMBRE DESPUÉS DE ELIMINACIÓN ===");
+        arbolPorNombre.mostrarRecorridos();
+    }
+}
